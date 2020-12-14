@@ -43,7 +43,7 @@ export let colorscheme = vibrant;
 
 let lines = yGroups;
 let campusstats = false;
-const parseTime = d3.timeParse("%m/%d/%y");
+const parseTime = d3.timeParse("%b %Y");
 
 
 $: xScale = d3.scaleTime()
@@ -59,7 +59,7 @@ $: colors = d3.scaleOrdinal()
 onMount(generateLineChart);
 
 function generateLineChart() {
-	xScale.domain(d3.extent(data, function(d) { return parseTime(d[xVar]) }))
+	xScale.domain(d3.extent(Object.keys(data[0]).filter(d => (d !== "State")).map(d => parseTime(d))))
 	yScale.domain(yDomain)
 
 	var svg = d3.select(el)
@@ -70,88 +70,115 @@ function generateLineChart() {
 		.attr("transform",
 		"translate(" + padding.left + "," + 0 + ")");
 
-		svg.append("g")
-	   	.attr("transform", "translate(0," + (height-padding.bottom) + ")")
-	   	.call(d3.axisBottom(xScale)
-	   	  .tickSizeInner(5)
-	   	  .tickSizeOuter(0)
-	   	  .tickPadding(5)
-	     )
-	     .call(g => g.select(".domain").remove())
-	  	.call(g => g.selectAll(".tick text").attr("text-anchor","end").attr("transform","rotate(-40 -8 8)"));
-
-	   svg.append("g")
-	   	.call(d3.axisLeft(yScale)
-	   	  .ticks(10)
-	   	  .tickSizeInner(-width)
-	   	  .tickSizeOuter(0)
-	   	  .tickPadding(3)
-	     )
-	     .call(g => g.select(".domain").remove());
-
-
-
+	let axescontainer = svg.append("g")
+	let datacontainer = svg.append("g")
 
 	// add data lines
-	for (let l in lines) {
-		let category = lines[l];
-		svg.append("path")
-			.datum(data)
+	for (let s in data) {
+		let statedata = Object.entries(data[s]).map(([key, value]) => ({key,value}));
+		let statename = data[s].State;
+
+		datacontainer.append("path")
+			.datum(statedata)
+			.classed(statename, true)
 			.attr("fill", "none")
-			.attr("stroke", colors(category))
-			.attr("stroke-width", 2.3)
+			.attr("stroke", "grey")
+			.attr("stroke-width", 2)
+			.attr("opacity", 0.5)
 			.attr("d", d3.line()
-			.x(function(d) { return xScale(parseTime(d[xVar])) })
-			.y(function(d) { return yScale(parseFloat(d[category]))}));
-	}
+ 				.defined(d => !isNaN(d.value))
+				.x(function(d) { return xScale(parseTime(d.key))  })
+				.y(function(d) { return yScale(d.value)})
+			)
+			.on("mouseover mousemove", function(event, d) {
+				d3.select(this)
+					.raise()
+					.attr("stroke", colors(statename))
+					.attr("stroke-width", 10)
+					.attr("opacity", 1)
+
+				console.log(d)
+			}).on("mouseleave", function(d) {
+				d3.select(this)
+					.lower()
+					.attr("stroke", "grey")
+		 			.attr("stroke-width", 2)
+		 			.attr("opacity", 0.5)
+			});
+		// svg append
+	} // add data labels
+
+
+
+	axescontainer.append("g")
+		.attr("transform", "translate(0," + (height-padding.bottom) + ")")
+		.call(d3.axisBottom(xScale)
+		  .tickSizeInner(5)
+		  .tickSizeOuter(0)
+		  .tickPadding(5)
+		  .tickFormat(d3.timeFormat("%b %Y"))
+	  )
+	  .call(g => g.select(".domain").remove())
+	.call(g => g.selectAll(".tick text").attr("text-anchor","end").attr("transform","rotate(-40 -8 8)"));
+
+	axescontainer.append("g")
+		.call(d3.axisLeft(yScale)
+		  .ticks(10)
+		  .tickSizeInner(-width)
+		  .tickSizeOuter(0)
+		  .tickPadding(3)
+	  )
+	  .call(g => g.select(".domain").remove());
+
+
 
 
 
 // line labels
-lines.forEach(function(l,i){
-	let offset = 6;
-
-	if (
-		(i == 1) &&
-		((data[data.length-1][lines[i]] - data[data.length-1][lines[i-1]]) < 40)
-		)
-	{
-		offset = yScale(data[data.length-1][l]) - 5;
-	}
-	else if (
-		(i == 1) &&
-		((data[data.length-1][lines[i-1]] - data[data.length-1][lines[i]]) < 40) &&
-		((data[data.length-1][lines[i-1]] - data[data.length-1][lines[i]]) > 0)
-		)
-	{
-		offset = yScale(data[data.length-1][l]) + 5;
-	}
-	else
-	{
-		offset = yScale(data[data.length-1][l]);
-	}
-
-		// add line label squares
-		if (campusstats) {
-			let g = svg.append("g")
-				.attr("transform", "translate(" + (xScale.range()[1]) + ", " + (offset-6) + ")")
-
-			g.append("rect")
-				.attr("width",56)
-				.attr("height",12)
-				.attr("fill", colorscheme[i])
-
-			g.append("text")
-				.attr("class","linelabel")
-				.attr("text-anchor", "middle")
-				.attr("fill", "white")
-				.attr("x", 28)
-				.attr("y", 9)
-				.attr("font-size", "9px")
-				.html(["ON CAMPUS","OFF CAMPUS"][i])
-		}
-
-}) // lines ForEach
+// lines.forEach(function(l,i){
+// 	let offset = 6;
+//
+// 	if (
+// 		(i == 1) &&
+// 		((data[data.length-1][lines[i]] - data[data.length-1][lines[i-1]]) < 40)
+// 		)
+// 	{
+// 		offset = yScale(data[data.length-1][l]) - 5;
+// 	}
+// 	else if (
+// 		(i == 1) &&
+// 		((data[data.length-1][lines[i-1]] - data[data.length-1][lines[i]]) < 40) &&
+// 		((data[data.length-1][lines[i-1]] - data[data.length-1][lines[i]]) > 0)
+// 		)
+// 	{
+// 		offset = yScale(data[data.length-1][l]) + 5;
+// 	}
+// 	else
+// 	{
+// 		offset = yScale(data[data.length-1][l]);
+// 	}
+//
+// 		// add line label squares
+// 		if (campusstats) {
+// 			let g = svg.append("g")
+// 				.attr("transform", "translate(" + (xScale.range()[1]) + ", " + (offset-6) + ")")
+//
+// 			g.append("rect")
+// 				.attr("width",56)
+// 				.attr("height",12)
+// 				.attr("fill", colorscheme[i])
+//
+// 			g.append("text")
+// 				.attr("class","linelabel")
+// 				.attr("text-anchor", "middle")
+// 				.attr("fill", "white")
+// 				.attr("x", 28)
+// 				.attr("y", 9)
+// 				.attr("font-size", "9px")
+// 				.html(["ON CAMPUS","OFF CAMPUS"][i])
+// 		}
+//
+// }) // lines ForEach
 
 }
 </script>

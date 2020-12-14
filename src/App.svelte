@@ -7,8 +7,8 @@
 	import XYHeatmap from './charts/XYHeatmap.svelte'
 	import GraphicTitle from './components/GraphicTitle.svelte'
 	import GraphicFooter from './components/GraphicFooter.svelte'
-	import * as dataset from '../public/datasets/turnout.json'
-	import * as applemaps from '../public/datasets/applemaps.json'
+	import USStates from './helpers/USStates.js'
+	import * as dataset from '../public/datasets/data.json'
 
 	export let width = Math.min(
 		document.getElementById('interactive').getBoundingClientRect().width,
@@ -26,51 +26,19 @@
 </style>
 
 <GraphicTitle
-	title={"Data Viz Templates"}
+	title={"2020 monthly unemployment rates by state"}
 	subhed={"A look at something etc"}
 />
-<!-- <BarChart
-	data = {dataset.default.filter(d => (["Massachusetts","Vermont","New Hampshire","Maine","Connecticut","Rhode Island"]).indexOf(d.state) > -1)}
-	width = {width}
-	height = {height}
-	title={"Transit Changes"}
-	xVar={"state"}
-	yVar={"earlyvotes20"}
-/>
-<ColumnChart
-	data = {dataset.default.filter(d => (["Massachusetts","Vermont","New Hampshire","Maine","Connecticut","Rhode Island"]).indexOf(d.state) > -1)}
-	width = {width}
-	height = {height}
-	title={"Transit Changes"}
-	xVar={"state"}
-	yVar={"earlyvotes20"}
-/>
-<XYHeatmap
-	data = {applemaps.default}
-	width = {width}
-	height = {500}
-	title={"Transit Changes"}
-	xVar={"date"}
-	yGroups={["driving", "transit", "walking"]}
-	yDomain={[0, 200]}
-/> -->
-<LineChart
-	data = {applemaps.default}
-	width = {width}
-	height = {height}
-	xVar={"date"}
-	yVar={"transit"}
-/>
 <MultiLineChart
-	data = {applemaps.default}
+	data = {dataset.default}
 	width = {width}
-	height = {height}
+	height = {Math.min(400, width * 0.67)}
 	xVar={"date"}
-	yGroups={["driving", "transit", "walking"]}
-	yDomain={[0, 200]}
+	yGroups={USStates.map(d => d.name)}
+	yDomain={[0, 30]}
 />
 <GraphicFooter
-	source={'<a href="https://electproject.github.io/Early-Vote-2020G/index.html">United States Elections Project</a>'}
-	note={'Accessed Nov 2020'}
-	credit={'King Husky/Northeastern University'}
+	source={'<a href="https://www.bls.gov/charts/state-employment-and-unemployment/state-unemployment-rates-animated.htm">Bureau of Labor Statistics</a>'}
+	note={''}
+	credit={'Tyler Machado/Northeastern University'}
 />
