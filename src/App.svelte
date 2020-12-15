@@ -19,6 +19,8 @@
 		document.getElementById('interactive').getBoundingClientRect().height,
 		1000
 	);
+
+	let active = "x";
 </script>
 
 <style>
@@ -29,6 +31,18 @@
 	title={"2020 monthly unemployment rates by state"}
 	subhed={"A look at something etc"}
 />
+<div id="interactive-filter">
+		<span>Select a state</span>
+		<form>
+			<select bind:value={active}>
+				{#each dataset.default as opt}
+					<option value={opt.State}>
+						{opt.State}
+					</option>
+				{/each}
+			</select>
+		</form>
+	</div>
 <MultiLineChart
 	data = {dataset.default}
 	width = {width}
@@ -36,6 +50,7 @@
 	xVar={"date"}
 	yGroups={USStates.map(d => d.name)}
 	yDomain={[0, 30]}
+	active={"x"}
 />
 <GraphicFooter
 	source={'<a href="https://www.bls.gov/charts/state-employment-and-unemployment/state-unemployment-rates-animated.htm">Bureau of Labor Statistics</a>'}

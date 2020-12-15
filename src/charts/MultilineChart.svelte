@@ -1,5 +1,5 @@
 <script>
-import { onMount } from 'svelte';
+import { onMount, afterUpdate } from 'svelte';
 import { scaleLinear, scaleBand, scaleTime, scaleOrdinal } from 'd3-scale';
 import { axisLeft, axisRight, axisTop, axisBottom } from 'd3-axis';
 import { line } from 'd3-shape';
@@ -39,6 +39,7 @@ export let height = {height};
 export let xVar = {xVar};
 export let yGroups = {yGroups};
 export let yDomain = {yDomain};
+export let props = {active};
 export let colorscheme = vibrant;
 
 let lines = yGroups;
@@ -56,7 +57,13 @@ $: colors = d3.scaleOrdinal()
 	.domain(lines)
 	.range(colorscheme)
 
+function highlightActive() {
+	props = {active}
+	console.log(props)
+}
+
 onMount(generateLineChart);
+afterUpdate(highlightActive);
 
 function generateLineChart() {
 	xScale.domain(d3.extent(Object.keys(data[0]).filter(d => (d !== "State")).map(d => parseTime(d))))
@@ -75,16 +82,18 @@ function generateLineChart() {
 
 	// add data lines
 	for (let s in data) {
-		let statedata = Object.entries(data[s]).map(([key, value]) => ({key,value}));
+		let statedata = Object.entries(data[s])
+			.map(([key, value]) => ({key,value}));
+
 		let statename = data[s].State;
 
 		datacontainer.append("path")
 			.datum(statedata)
-			.classed(statename, true)
+			.classed(statename.split(' ').join('_'), true)
 			.attr("fill", "none")
-			.attr("stroke", "grey")
+			.attr("stroke", colors(statename))
 			.attr("stroke-width", 2)
-			.attr("opacity", 0.5)
+			.attr("opacity", 0.35)
 			.attr("d", d3.line()
  				.defined(d => !isNaN(d.value))
 				.x(function(d) { return xScale(parseTime(d.key))  })
@@ -93,17 +102,13 @@ function generateLineChart() {
 			.on("mouseover mousemove", function(event, d) {
 				d3.select(this)
 					.raise()
-					.attr("stroke", colors(statename))
 					.attr("stroke-width", 10)
 					.attr("opacity", 1)
-
-				console.log(d)
 			}).on("mouseleave", function(d) {
 				d3.select(this)
 					.lower()
-					.attr("stroke", "grey")
 		 			.attr("stroke-width", 2)
-		 			.attr("opacity", 0.5)
+		 			.attr("opacity", 0.35)
 			});
 		// svg append
 	} // add data labels
@@ -119,14 +124,15 @@ function generateLineChart() {
 		  .tickFormat(d3.timeFormat("%b %Y"))
 	  )
 	  .call(g => g.select(".domain").remove())
-	.call(g => g.selectAll(".tick text").attr("text-anchor","end").attr("transform","rotate(-40 -8 8)"));
+		.call(g => g.selectAll(".tick text").attr("text-anchor","end").attr("transform","rotate(-40 -8 8)"));
 
 	axescontainer.append("g")
 		.call(d3.axisLeft(yScale)
-		  .ticks(10)
+		  .ticks(5)
 		  .tickSizeInner(-width)
 		  .tickSizeOuter(0)
 		  .tickPadding(3)
+		  .tickFormat(d => (d + "%"))
 	  )
 	  .call(g => g.select(".domain").remove());
 
