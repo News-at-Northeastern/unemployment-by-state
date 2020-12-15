@@ -39,7 +39,7 @@ export let height = {height};
 export let xVar = {xVar};
 export let yGroups = {yGroups};
 export let yDomain = {yDomain};
-export let props = {active};
+export let active = {active};
 export let colorscheme = vibrant;
 
 let lines = yGroups;
@@ -58,8 +58,15 @@ $: colors = d3.scaleOrdinal()
 	.range(colorscheme)
 
 function highlightActive() {
-	props = {active}
-	console.log(props)
+	d3.selectAll("path")
+		.lower()
+		.attr("stroke-width", 2)
+		.attr("opacity", 0.35)
+
+	d3.select("path." + active.split(' ').join('_'))
+		.raise()
+		.attr("stroke-width", 10)
+		.attr("opacity", 1)
 }
 
 onMount(generateLineChart);
@@ -100,10 +107,7 @@ function generateLineChart() {
 				.y(function(d) { return yScale(d.value)})
 			)
 			.on("mouseover mousemove", function(event, d) {
-				d3.select(this)
-					.raise()
-					.attr("stroke-width", 10)
-					.attr("opacity", 1)
+				active = d[0].value
 			}).on("mouseleave", function(d) {
 				d3.select(this)
 					.lower()

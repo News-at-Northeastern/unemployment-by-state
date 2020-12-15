@@ -50,7 +50,7 @@
 	xVar={"date"}
 	yGroups={USStates.map(d => d.name)}
 	yDomain={[0, 30]}
-	active={"x"}
+	active={active}
 />
 <GraphicFooter
 	source={'<a href="https://www.bls.gov/charts/state-employment-and-unemployment/state-unemployment-rates-animated.htm">Bureau of Labor Statistics</a>'}
