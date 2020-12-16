@@ -8,7 +8,7 @@ import { extent } from 'd3-array';
 import { select, selectAll } from 'd3-selection';
 import { timeParse, timeFormat } from 'd3-time-format';
 import { legendColor } from 'd3-svg-legend';
-import { colorgorical } from '../helpers/colors.js'
+import { vibrant } from '../helpers/colors.js'
 
 let d3 = {
 	scaleLinear: scaleLinear,
@@ -41,7 +41,7 @@ export let yGroups = {yGroups};
 export let yDomain = {yDomain};
 export let active = {active};
 export let activecolor = {activecolor};
-export let colorscheme = colorgorical;
+export let colorscheme = vibrant;
 
 let lines = yGroups;
 let campusstats = false;

@@ -20,7 +20,7 @@
 		1000
 	);
 
-	let active = "x";
+	let active = "";
 	export let activecolor = "#dedede";
 </script>
 
