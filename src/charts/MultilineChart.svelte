@@ -8,7 +8,7 @@ import { extent } from 'd3-array';
 import { select, selectAll } from 'd3-selection';
 import { timeParse, timeFormat } from 'd3-time-format';
 import { legendColor } from 'd3-svg-legend';
-import { vibrant } from '../helpers/colors.js'
+import { colorgorical } from '../helpers/colors.js'
 
 let d3 = {
 	scaleLinear: scaleLinear,
@@ -31,7 +31,7 @@ let d3 = {
 
 let el;
 
-const padding = { top: 5, right: 5, bottom: 40, left: 30 };
+const padding = { top: 15, right: 15, bottom: 40, left: 30 };
 
 export let data = {data};
 export let width = {width};
@@ -40,7 +40,8 @@ export let xVar = {xVar};
 export let yGroups = {yGroups};
 export let yDomain = {yDomain};
 export let active = {active};
-export let colorscheme = vibrant;
+export let activecolor = {activecolor};
+export let colorscheme = colorgorical;
 
 let lines = yGroups;
 let campusstats = false;
@@ -58,15 +59,31 @@ $: colors = d3.scaleOrdinal()
 	.range(colorscheme)
 
 function highlightActive() {
+	d3.selectAll("g.datapts")
+		.lower()
+		.attr("opacity", 0)
+
 	d3.selectAll("path")
 		.lower()
 		.attr("stroke-width", 2)
 		.attr("opacity", 0.35)
 
-	d3.select("path." + active.split(' ').join('_'))
-		.raise()
-		.attr("stroke-width", 10)
-		.attr("opacity", 1)
+	if (active) {
+		activecolor = colors(active);
+
+		d3.select("path." + active.split(' ').join('_'))
+			.raise()
+			.attr("stroke-width", 10)
+			.attr("opacity", 1)
+
+		d3.select("g." + active.split(' ').join('_'))
+			.raise()
+			.attr("opacity", 1)
+	} else {
+		activecolor = "#dedede";
+	}
+
+
 }
 
 onMount(generateLineChart);
@@ -109,11 +126,47 @@ function generateLineChart() {
 			.on("mouseover mousemove", function(event, d) {
 				active = d[0].value
 			}).on("mouseleave", function(d) {
-				d3.select(this)
-					.lower()
-		 			.attr("stroke-width", 2)
-		 			.attr("opacity", 0.35)
+				active = null;
 			});
+
+		let datapts = datacontainer.append("g")
+			.classed(statename.split(' ').join('_'), true)
+			.classed("datapts", true)
+			.attr("opacity", 0)
+
+		datapts.selectAll("circle")
+			.data(statedata.filter(d => !isNaN(d.value)))
+			.enter()
+			.append("circle")
+			.attr("fill", colors(statename))
+			.attr("r", 14)
+			.attr("cx", function(d) { return xScale(parseTime(d.key))  })
+			.attr("cy", function(d) { return yScale(d.value)})
+			.on("mouseover mousemove", function(event, d) {
+				active = statename
+			}).on("mouseleave", function(d) {
+				active = null;
+			})
+
+		datapts.selectAll("text")
+			.data(statedata.filter(d => !isNaN(d.value)))
+			.enter()
+			.append("text")
+			.attr("fill", "white")
+			.attr("text-anchor", "middle")
+			.attr("font-size", "11px")
+			.attr("letter-spacing", "-1")
+			.attr("dy", "3px")
+			.attr("x", function(d) { return xScale(parseTime(d.key))  })
+			.attr("y", function(d) { return yScale(d.value)})
+			.text(function(d) { return d.value + "%"})
+			.on("mouseover mousemove", function(event, d) {
+				active = statename
+			}).on("mouseleave", function(d) {
+				active = null;
+			})
+
+
 		// svg append
 	} // add data labels
 
@@ -133,7 +186,7 @@ function generateLineChart() {
 	axescontainer.append("g")
 		.call(d3.axisLeft(yScale)
 		  .ticks(5)
-		  .tickSizeInner(-width)
+		  .tickSizeInner(-width + padding.right + padding.left)
 		  .tickSizeOuter(0)
 		  .tickPadding(3)
 		  .tickFormat(d => (d + "%"))

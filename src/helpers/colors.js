@@ -5,8 +5,10 @@ export const vibrant = [
    "#FFBF3D",
    "#006EB5",
    "#006d2c",
-    "#5e00d1"
+   "#5e00d1"
 ]
+
+export const colorgorical = ["#5b588f", "#c56d2b", "#5cbca1", "#cb2355", "#0a4f4e", "#bc9495", "#709f0f", "#bb15b7", "#31c52f", "#7d2b22", "#54b2fc", "#cf80dd", "#2d029b"]
 
 export const pastels = [
    '#74c28c',
