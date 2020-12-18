@@ -1,22 +1,12 @@
 <script>
 	import { onMount } from 'svelte';
-	import BarChart from './charts/BarChart.svelte'
-	import ColumnChart from './charts/ColumnChart.svelte'
-	import LineChart from './charts/LineChart.svelte'
 	import MultiLineChart from './charts/MultiLineChart.svelte'
-	import XYHeatmap from './charts/XYHeatmap.svelte'
 	import GraphicTitle from './components/GraphicTitle.svelte'
 	import GraphicFooter from './components/GraphicFooter.svelte'
-	import USStates from './helpers/USStates.js'
 	import * as dataset from '../public/datasets/data.json'
 
 	export let width = Math.min(
-		document.getElementById('interactive').getBoundingClientRect().width,
-		1000
-	);
-
-	export let height = Math.min(
-		document.getElementById('interactive').getBoundingClientRect().height,
+		document.getElementById('multilinechart').getBoundingClientRect().width,
 		1000
 	);
 
@@ -25,23 +15,23 @@
 </script>
 
 <style>
-#interactive-filter {
+#multilinechart-filter {
 	display:block;
 	width: 100%;
 	text-align:center;
 	margin:0 0 2rem;
 }
 
-#interactive-filter div {
-	font-size:1rem;
+#multilinechart-filter div {
+	font-size:0.9rem;
 	margin:0 0 1rem;
 }
 
-#interactive-filter form {
-	padding:10px;
+#multilinechart-filter form {
+	padding:0px;
 }
 
-#interactive-filter form select {
+#multilinechart-filter form select {
 	font-size:1.25rem;
 	font-family: "Akkurat", sans-serif;
 	padding:0.5rem 0.2rem;
@@ -49,7 +39,7 @@
 	background-color:white;
 }
 
-#interactive-filter form select:focus {
+#multilinechart-filter form select:focus {
 	outline: none
 }
 
@@ -59,7 +49,7 @@
 	title={"2020 monthly unemployment rates by state"}
 	subhed={"A look at something etc"}
 />
-<div id="interactive-filter">
+<div id="multilinechart-filter">
 	<div>Select a state below to see its unemployment rates across the months of 2020.</div>
 	<form>
 		<select bind:value={active}  style={"border:7.5px solid " + activecolor}>
